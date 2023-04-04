@@ -1,38 +1,44 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route } from "react-router-dom";
-import NavBar from "./NavBar";
-import Login from "../pages/Login";
-import RecipeList from "../pages/RecipeList";
-import NewRecipe from "../pages/NewRecipe";
+import Article from "./Article";
+import Header from "./Header";
+import Home from "./Home";
+import Login from "./Login";
 
 function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // auto-login
-    fetch("/me").then((r) => {
-      if (r.ok) {
-        r.json().then((user) => setUser(user));
+    fetch("/me").then((response) => {
+      if (response.ok) {
+        response.json().then((user) => setUser(user));
       }
     });
   }, []);
 
-  if (!user) return <Login onLogin={setUser} />;
+  function handleLogin(user) {
+    setUser(user);
+  }
+
+  function handleLogout() {
+    setUser(null);
+  }
 
   return (
-    <>
-      <NavBar user={user} setUser={setUser} />
-      <main>
-        <Switch>
-          <Route path="/new">
-            <NewRecipe user={user} />
-          </Route>
-          <Route path="/">
-            <RecipeList />
-          </Route>
-        </Switch>
-      </main>
-    </>
+    <div className="App">
+      <Header user={user} onLogout={handleLogout} />
+      <Switch>
+        <Route exact path="/articles/:id">
+          <Article />
+        </Route>
+        <Route exact path="/login">
+          <Login onLogin={handleLogin} />
+        </Route>
+        <Route exact path="/">
+          <Home />
+        </Route>
+      </Switch>
+    </div>
   );
 }
 
